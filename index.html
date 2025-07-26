@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NEWGROHO24.id</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col font-sans">
+
+  <!-- Header -->
+  <header class="flex justify-between items-center px-4 py-3 bg-green-700 relative z-50">
+    <h1 class="text-2xl font-extrabold tracking-wide">NEWGROHO24.id</h1>
+    
+    <div class="relative">
+      <button id="menuButton" class="text-white bg-green-900 px-4 py-2 text-lg font-bold rounded md:hidden">
+        MENU
+      </button>
+      
+      <div id="sidebar" class="absolute right-0 mt-2 bg-green-800 w-48 shadow-lg rounded-md z-50 hidden md:flex md:static md:bg-transparent md:shadow-none md:rounded-none">
+        <nav class="flex flex-col divide-y divide-green-600 md:flex-row md:items-center md:gap-6 md:divide-y-0">
+          <a href="#" class="block px-4 py-3 font-semibold hover:bg-green-600 rounded md:hover:bg-transparent">Beranda</a>
+          <a href="#" class="block px-4 py-3 font-semibold hover:bg-green-600 rounded md:hover:bg-transparent">Profil</a>
+          <a href="#" class="block px-4 py-3 font-semibold hover:bg-green-600 rounded md:hover:bg-transparent">Trading</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Konten Utama -->
+  <main class="p-6 flex-grow">
+    <h2 class="text-3xl font-semibold text-green-400 mb-4">Selamat datang di NEWGROHO24.id</h2>
+    <p class="text-gray-300">Ini adalah situs edukasi dan informasi komunitas dalam dunia trading.</p>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-green-900 text-white py-4 px-4 text-center">
+    <p class="text-sm">© 2025 NEWGROHO24.id</p>
+  </footer>
+
+  <!-- Script Dropdown -->
+  <script>
+    const menuButton = document.getElementById('menuButton');
+    const sidebar = document.getElementById('sidebar');
+
+    menuButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('hidden');
+    });
+
+    window.addEventListener('click', (e) => {
+      if (!menuButton.contains(e.target) && !sidebar.contains(e.target)) {
+        sidebar.classList.add('hidden');
+      }
+    });
+  </script>
+
+</body>
+            </html>
