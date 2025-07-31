@@ -1,73 +1,100 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NEWGROHO24.id</title>
+
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
 </head>
-<body class="bg-gray-950 text-white min-h-screen flex flex-col">
+<body class="bg-gray-950 text-white min-h-screen flex flex-col font-sans">
 
-  <!-- Header, Konten, Chatbox sama seperti sebelumnya (1 saja) -->
-  <!-- ... -->
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-cyan-700 to-blue-800 px-6 py-4 shadow-md">
+    <h1 class="text-2xl font-bold">NEWGROHO24.id</h1>
+  </header>
 
-  <!-- Chatbox -->
-  <div class="chat-container max-w-md mx-auto p-4 bg-gray-900 rounded">
-    <h3 class="text-cyan-400 mb-2">💬 Live Chat</h3>
-    <div id="chat" class="h-60 overflow-y-scroll bg-gray-800 p-2 rounded mb-2"></div>
-    <input id="name" class="w-full mb-2 p-2 bg-gray-700 rounded" placeholder="Nama">
-    <div class="flex gap-2 mb-2">
-      <input id="msg" class="flex-grow p-2 bg-gray-700 rounded" placeholder="Pesan">
-      <button onclick="send()" class="bg-cyan-600 hover:bg-cyan-500 p-2 rounded">Kirim</button>
+  <!-- Konten Utama -->
+  <main class="flex-grow p-6 flex flex-col items-center justify-center text-center">
+    <img src="https://cdn-icons-png.flaticon.com/512/5957/5957495.png" alt="Maintenance Icon" class="w-28 h-28 mb-4" />
+    <h2 class="text-3xl font-bold text-cyan-400 mb-2">Website Sedang Dalam Pemeliharaan</h2>
+    <p class="text-gray-400 max-w-md mb-6">
+      Kami sedang meningkatkan layanan. Silakan kembali beberapa saat lagi.
+    </p>
+
+    <!-- Chatbox -->
+    <div class="w-full max-w-md bg-gray-900 rounded-lg shadow-lg p-4">
+      <h3 class="text-xl font-semibold text-cyan-400 mb-3">💬 Live Chat</h3>
+      <div id="chat" class="h-60 overflow-y-scroll bg-gray-800 p-3 rounded mb-3 text-sm space-y-1"></div>
+      <input id="name" class="w-full mb-2 px-3 py-2 rounded bg-gray-700 text-white" placeholder="Nama Anda" />
+      <div class="flex gap-2 mb-2">
+        <input id="msg" class="flex-grow px-3 py-2 rounded bg-gray-700 text-white" placeholder="Tulis pesan..." />
+        <button onclick="send()" class="bg-cyan-600 hover:bg-cyan-500 px-4 py-2 rounded text-white">Kirim</button>
+      </div>
+      <button onclick="clearChat()" class="w-full bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded text-sm">🗑️ Hapus Semua Chat</button>
     </div>
-    <button onclick="clearChat()" class="w-full bg-red-600 hover:bg-red-500 p-2 rounded text-sm">🗑️ Hapus Semua Chat</button>
-  </div>
+  </main>
 
-  <!-- Notifikasi -->
-  <audio id="notifSound" src="notif.mp3" preload="auto"></audio>
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-400 text-center py-4 text-sm">
+    © 2025 NEWGROHO24.id | Semua hak cipta dilindungi.
+  </footer>
 
-  <!-- Script tunggal untuk Firebase Chat -->
+  <!-- Suara Notifikasi -->
+  <audio id="notifSound" src="https://www.soundjay.com/buttons/sounds/button-09.mp3" preload="auto"></audio>
+
+  <!-- Firebase Chat Script -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyAa72M195nIsevvvwqDbuhSBODyGrInTqQ",
       authDomain: "chatbox-feeb2.firebaseapp.com",
       databaseURL: "https://chatbox-feeb2-default-rtdb.firebaseio.com",
       projectId: "chatbox-feeb2",
-      storageBucket: "chatbox-feeb2.firebasestorage.app",
+      storageBucket: "chatbox-feeb2.appspot.com",
       messagingSenderId: "434967499697",
       appId: "1:434967499697:web:88f8282dcc97560e17a390"
     };
+
+    // Inisialisasi Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // Fungsi Kirim Pesan
     function send() {
       const name = document.getElementById("name").value.trim();
       const msg = document.getElementById("msg").value.trim();
       if (!name || !msg) return;
+
       db.ref("chat").push({ name, msg });
       document.getElementById("msg").value = "";
     }
 
+    // Fungsi Hapus Semua Chat
     function clearChat() {
-      if (confirm("Yakin hapus semua chat?")) {
+      if (confirm("Yakin ingin menghapus semua chat?")) {
         db.ref("chat").remove();
         document.getElementById("chat").innerHTML = "";
       }
     }
 
-    db.ref("chat").off(); // Hapus listener lama jika ada
-    db.ref("chat").on("child_added", snapshot => {
+    // Tampilkan Pesan Baru
+    db.ref("chat").on("child_added", (snapshot) => {
       const data = snapshot.val();
       const chatDiv = document.getElementById("chat");
-      const div = document.createElement("div");
-      div.textContent = `${data.name}: ${data.msg}`;
-      div.className = "p-2 bg-gray-700 rounded text-white";
-      chatDiv.appendChild(div);
+      const message = document.createElement("div");
+      message.innerHTML = `<span class="text-cyan-400 font-semibold">${data.name}:</span> ${data.msg}`;
+      chatDiv.appendChild(message);
       chatDiv.scrollTop = chatDiv.scrollHeight;
-      document.getElementById("notifSound").play().catch(() => {});
+
+      // Nada notifikasi
+      const sound = document.getElementById("notifSound");
+      if (sound) sound.play().catch(() => {});
     });
   </script>
 </body>
-</html>
+       </html>
