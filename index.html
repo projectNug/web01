@@ -1,100 +1,238 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NEWGROHO24.id</title>
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
-</head>
-<body class="bg-gray-950 text-white min-h-screen flex flex-col font-sans">
-
-  <!-- Header -->
-  <header class="bg-gradient-to-r from-cyan-700 to-blue-800 px-6 py-4 shadow-md">
-    <h1 class="text-2xl font-bold">NEWGROHO24.id</h1>
-  </header>
-
-  <!-- Konten Utama -->
-  <main class="flex-grow p-6 flex flex-col items-center justify-center text-center">
-    <img src="https://cdn-icons-png.flaticon.com/512/5957/5957495.png" alt="Maintenance Icon" class="w-28 h-28 mb-4" />
-    <h2 class="text-3xl font-bold text-cyan-400 mb-2">Website Sedang Dalam Pemeliharaan</h2>
-    <p class="text-gray-400 max-w-md mb-6">
-      Kami sedang meningkatkan layanan. Silakan kembali beberapa saat lagi.
-    </p>
-
-    <!-- Chatbox -->
-    <div class="w-full max-w-md bg-gray-900 rounded-lg shadow-lg p-4">
-      <h3 class="text-xl font-semibold text-cyan-400 mb-3">💬 Live Chat</h3>
-      <div id="chat" class="h-60 overflow-y-scroll bg-gray-800 p-3 rounded mb-3 text-sm space-y-1"></div>
-      <input id="name" class="w-full mb-2 px-3 py-2 rounded bg-gray-700 text-white" placeholder="Nama Anda" />
-      <div class="flex gap-2 mb-2">
-        <input id="msg" class="flex-grow px-3 py-2 rounded bg-gray-700 text-white" placeholder="Tulis pesan..." />
-        <button onclick="send()" class="bg-cyan-600 hover:bg-cyan-500 px-4 py-2 rounded text-white">Kirim</button>
-      </div>
-      <button onclick="clearChat()" class="w-full bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded text-sm">🗑️ Hapus Semua Chat</button>
-    </div>
-  </main>
-
-  <!-- Footer -->
-  <footer class="bg-gray-900 text-gray-400 text-center py-4 text-sm">
-    © 2025 NEWGROHO24.id | Semua hak cipta dilindungi.
-  </footer>
-
-  <!-- Suara Notifikasi -->
-  <audio id="notifSound" src="https://www.soundjay.com/buttons/sounds/button-09.mp3" preload="auto"></audio>
-
-  <!-- Firebase Chat Script -->
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyAa72M195nIsevvvwqDbuhSBODyGrInTqQ",
-      authDomain: "chatbox-feeb2.firebaseapp.com",
-      databaseURL: "https://chatbox-feeb2-default-rtdb.firebaseio.com",
-      projectId: "chatbox-feeb2",
-      storageBucket: "chatbox-feeb2.appspot.com",
-      messagingSenderId: "434967499697",
-      appId: "1:434967499697:web:88f8282dcc97560e17a390"
-    };
-
-    // Inisialisasi Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    // Fungsi Kirim Pesan
-    function send() {
-      const name = document.getElementById("name").value.trim();
-      const msg = document.getElementById("msg").value.trim();
-      if (!name || !msg) return;
-
-      db.ref("chat").push({ name, msg });
-      document.getElementById("msg").value = "";
+  <title>Game Karambol</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #111;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
-    // Fungsi Hapus Semua Chat
-    function clearChat() {
-      if (confirm("Yakin ingin menghapus semua chat?")) {
-        db.ref("chat").remove();
-        document.getElementById("chat").innerHTML = "";
+    canvas {
+      background: #3e2723;
+      border: 10px solid #8d6e63;
+      border-radius: 10px;
+      box-shadow: 0 0 20px black;
+    }
+  </style>
+</head>
+<body>
+<canvas id="board" width="600" height="600"></canvas>
+
+<script>
+const canvas = document.getElementById("board");
+const ctx = canvas.getContext("2d");
+
+const WIDTH = canvas.width;
+const HEIGHT = canvas.height;
+
+const friction = 0.985;
+const radius = 10;
+const strikerRadius = 12;
+const holes = [
+  {x: 0, y: 0},
+  {x: WIDTH, y: 0},
+  {x: 0, y: HEIGHT},
+  {x: WIDTH, y: HEIGHT}
+];
+
+const coins = [];
+let striker;
+
+function resetStriker() {
+  const index = coins.findIndex(b => b.isStriker);
+  if (index !== -1) coins.splice(index, 1);
+
+  striker = new Ball(WIDTH / 2, HEIGHT - 50, "white", true);
+  coins.unshift(striker);
+}
+
+class Ball {
+  constructor(x, y, color, isStriker = false) {
+    this.x = x;
+    this.y = y;
+    this.vx = 0;
+    this.vy = 0;
+    this.color = color;
+    this.radius = isStriker ? strikerRadius : radius;
+    this.isStriker = isStriker;
+    this.removed = false;
+  }
+
+  draw() {
+    if (this.removed) return;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+    ctx.closePath();
+  }
+
+  move() {
+    if (this.removed) return;
+
+    this.x += this.vx;
+    this.y += this.vy;
+    this.vx *= friction;
+    this.vy *= friction;
+
+    if (this.x - this.radius <= 0 || this.x + this.radius >= WIDTH) {
+      this.vx *= -1;
+      this.x = Math.max(this.radius, Math.min(this.x, WIDTH - this.radius));
+    }
+    if (this.y - this.radius <= 0 || this.y + this.radius >= HEIGHT) {
+      this.vy *= -1;
+      this.y = Math.max(this.radius, Math.min(this.y, HEIGHT - this.radius));
+    }
+
+    for (let hole of holes) {
+      const dx = hole.x - this.x;
+      const dy = hole.y - this.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 18) {
+        this.removed = true;
       }
     }
+  }
+}
 
-    // Tampilkan Pesan Baru
-    db.ref("chat").on("child_added", (snapshot) => {
-      const data = snapshot.val();
-      const chatDiv = document.getElementById("chat");
-      const message = document.createElement("div");
-      message.innerHTML = `<span class="text-cyan-400 font-semibold">${data.name}:</span> ${data.msg}`;
-      chatDiv.appendChild(message);
-      chatDiv.scrollTop = chatDiv.scrollHeight;
+// Tambah coin
+const colors = ["red", "black", "yellow"];
+for (let i = 0; i < 6; i++) {
+  const angle = (i / 6) * Math.PI * 2;
+  const x = WIDTH / 2 + Math.cos(angle) * 30;
+  const y = HEIGHT / 2 + Math.sin(angle) * 30;
+  coins.push(new Ball(x, y, colors[i % colors.length]));
+}
 
-      // Nada notifikasi
-      const sound = document.getElementById("notifSound");
-      if (sound) sound.play().catch(() => {});
-    });
-  </script>
+resetStriker();
+
+function handleCollisions() {
+  for (let i = 0; i < coins.length; i++) {
+    for (let j = i + 1; j < coins.length; j++) {
+      const a = coins[i];
+      const b = coins[j];
+      if (a.removed || b.removed) continue;
+
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const minDist = a.radius + b.radius;
+
+      if (dist < minDist) {
+        const nx = dx / dist;
+        const ny = dy / dist;
+        const p = 2 * (a.vx * nx + a.vy * ny - b.vx * nx - b.vy * ny) / 2;
+
+        a.vx -= p * nx;
+        a.vy -= p * ny;
+        b.vx += p * nx;
+        b.vy += p * ny;
+
+        const overlap = minDist - dist;
+        a.x -= nx * overlap / 2;
+        a.y -= ny * overlap / 2;
+        b.x += nx * overlap / 2;
+        b.y += ny * overlap / 2;
+      }
+    }
+  }
+}
+
+function drawHoles() {
+  for (let hole of holes) {
+    ctx.beginPath();
+    ctx.arc(hole.x, hole.y, 18, 0, Math.PI * 2);
+    ctx.fillStyle = "black";
+    ctx.fill();
+    ctx.closePath();
+  }
+}
+
+function drawAimLine() {
+  if (aiming && !striker.removed && allBallsStopped()) {
+    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = "white";
+    ctx.beginPath();
+    ctx.moveTo(striker.x, striker.y);
+    ctx.lineTo(mouseX, mouseY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+}
+
+function allBallsStopped() {
+  return coins.every(ball =>
+    ball.removed || (Math.abs(ball.vx) < 0.1 && Math.abs(ball.vy) < 0.1)
+  );
+}
+
+function draw() {
+  ctx.clearRect(0, 0, WIDTH, HEIGHT);
+  drawHoles();
+
+  for (let ball of coins) {
+    ball.move();
+    ball.draw();
+  }
+
+  handleCollisions();
+  drawAimLine();
+
+  if (striker.removed && allBallsStopped()) {
+    resetStriker();
+  }
+
+  requestAnimationFrame(draw);
+}
+
+draw();
+
+// Kontrol mouse
+let aiming = false;
+let mouseX = 0;
+let mouseY = 0;
+
+canvas.addEventListener("mousedown", (e) => {
+  if (striker.removed || !allBallsStopped()) return;
+  aiming = true;
+  const rect = canvas.getBoundingClientRect();
+  mouseX = e.clientX - rect.left;
+  mouseY = e.clientY - rect.top;
+});
+
+canvas.addEventListener("mousemove", (e) => {
+  if (!aiming || striker.removed) return;
+  const rect = canvas.getBoundingClientRect();
+  mouseX = e.clientX - rect.left;
+  mouseY = e.clientY - rect.top;
+});
+
+canvas.addEventListener("mouseup", (e) => {
+  if (!aiming || striker.removed) return;
+  const rect = canvas.getBoundingClientRect();
+  const dx = (e.clientX - rect.left) - striker.x;
+  const dy = (e.clientY - rect.top) - striker.y;
+
+  const len = Math.sqrt(dx * dx + dy * dy);
+  if (len < 5) {
+    aiming = false;
+    return;
+  }
+
+  const maxSpeed = 10;
+  const factor = Math.min(0.05, maxSpeed / len);
+  striker.vx = dx * factor;
+  striker.vy = dy * factor;
+
+  aiming = false;
+});
+</script>
 </body>
-       </html>
+</html>
