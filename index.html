@@ -5,36 +5,108 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NEWGROHO24.id</title>
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Firebase CDN -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
 </head>
 <body class="bg-gray-950 text-white min-h-screen flex flex-col font-sans">
 
   <!-- Header -->
-  <header class="flex justify-between items-center px-6 py-4 bg-gradient-to-r from-cyan-700 to-blue-800 shadow-md relative z-50">
-    <h1 class="text-2xl font-bold tracking-wide text-white">NEWGROHO24.id</h1>
-    
-    <div class="relative">
-      <button id="menuButton" class="md:hidden text-white bg-cyan-600 hover:bg-cyan-500 px-4 py-2 rounded font-medium transition">
-        MENU
-      </button>
-      
-      <div id="sidebar" class="absolute right-0 mt-3 w-48 bg-gray-900 rounded-md shadow-lg hidden z-50 md:flex md:static md:bg-transparent md:shadow-none md:rounded-none">
-        <nav class="flex flex-col divide-y divide-gray-700 md:flex-row md:items-center md:gap-8 md:divide-y-0">
-          <a href="#" class="block px-4 py-2 hover:text-cyan-400 transition">Beranda</a>
-          <a href="#" class="block px-4 py-2 hover:text-cyan-400 transition">Profil</a>
-          <a href="#" class="block px-4 py-2 hover:text-cyan-400 transition">Trading</a>
-        </nav>
-      </div>
-    </div>
+  <header class="flex justify-between items-center px-6 py-4 bg-gradient-to-r from-cyan-700 to-blue-800 shadow-md">
+    <h1 class="text-2xl font-bold">NEWGROHO24.id</h1>
+    <button id="menuButton" class="md:hidden text-white bg-cyan-600 px-4 py-2 rounded">MENU</button>
+    <nav id="sidebar" class="hidden md:flex gap-6">
+      <a href="#" class="hover:text-cyan-400">Beranda</a>
+      <a href="#" class="hover:text-cyan-400">Profil</a>
+      <a href="#" class="hover:text-cyan-400">Trading</a>
+    </nav>
   </header>
 
-  <!-- Konten Maintenance -->
+  <!-- Konten -->
   <main class="flex-grow p-8 flex flex-col items-center justify-center text-center">
-    <img src="https://cdn-icons-png.flaticon.com/512/5957/5957495.png" alt="Maintenance Icon" class="w-40 h-40 mb-6 opacity-80" />
-    <h2 class="text-3xl md:text-4xl font-bold text-cyan-400 mb-4">Website Sedang Dalam Pemeliharaan</h2>
+    <img src="https://cdn-icons-png.flaticon.com/512/5957/5957495.png" alt="Maintenance Icon" class="w-40 h-40 mb-6" />
+    <h2 class="text-3xl font-bold text-cyan-400 mb-4">Website Sedang Dalam Pemeliharaan</h2>
+    <p class="text-gray-400 mb-8 max-w-xl">
+      Kami sedang melakukan perawatan sistem untuk meningkatkan kualitas layanan. Harap kembali beberapa saat lagi. Terima kasih atas kesabaran Anda.
+    </p>
+
+    <!-- Chatbox -->
+    <div class="w-full max-w-md bg-gray-900 rounded-lg shadow p-4">
+      <h3 class="text-xl font-semibold text-cyan-400 mb-3">💬 Live Chat</h3>
+      <div id="chat" class="h-60 overflow-y-scroll bg-gray-800 p-3 rounded mb-3 text-sm space-y-1"></div>
+      <input id="name" class="w-full mb-2 px-3 py-2 rounded bg-gray-700 text-white" placeholder="Nama Anda" />
+      <div class="flex gap-2 mb-2">
+        <input id="msg" class="flex-grow px-3 py-2 rounded bg-gray-700 text-white" placeholder="Tulis pesan..." />
+        <button onclick="send()" class="bg-cyan-600 hover:bg-cyan-500 px-4 py-2 rounded text-white">Kirim</button>
+      </div>
+      <button onclick="clearChat()" class="w-full bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded flex items-center justify-center gap-2">
+        🗑 Hapus Semua Chat
+      </button>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-400 text-center py-5 text-sm">
+    © 2025 NEWGROHO24.id | Situs sedang dalam pemeliharaan.
+  </footer>
+
+  <!-- Suara Notifikasi -->
+  <audio id="notifSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_9ba0a60279.mp3"></audio>
+
+  <!-- Script Toggle Menu -->
+  <script>
+    const menuButton = document.getElementById('menuButton');
+    const sidebar = document.getElementById('sidebar');
+
+    menuButton.addEventListener('click', () => {
+      sidebar.classList.toggle('hidden');
+    });
+  </script>
+
+  <!-- Firebase Script -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAa72M195nIsevvvwqDbuhSBODyGrInTqQ",
+      authDomain: "chatbox-feeb2.firebaseapp.com",
+      databaseURL: "https://chatbox-feeb2-default-rtdb.firebaseio.com",
+      projectId: "chatbox-feeb2",
+      storageBucket: "chatbox-feeb2.firebasestorage.app",
+      messagingSenderId: "434967499697",
+      appId: "1:434967499697:web:88f8282dcc97560e17a390"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function send() {
+      const name = document.getElementById("name").value.trim();
+      const msg = document.getElementById("msg").value.trim();
+      if (!name || !msg) return;
+
+      db.ref("chat").push({ name, msg });
+      document.getElementById("msg").value = "";
+    }
+
+    function clearChat() {
+      if (confirm("Yakin ingin menghapus semua chat?")) {
+        db.ref("chat").remove();
+        document.getElementById("chat").innerHTML = "";
+      }
+    }
+
+    db.ref("chat").on("child_added", (snapshot) => {
+      const data = snapshot.val();
+      const chatDiv = document.getElementById("chat");
+      const message = document.createElement("div");
+      message.innerHTML = `<span class="text-cyan-400 font-semibold">${data.name}:</span> ${data.msg}`;
+      chatDiv.appendChild(message);
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+
+      // Nada notifikasi
+      document.getElementById("notifSound").play().catch(() => {});
+    });
+  </script>
+</body>
+</html>    <h2 class="text-3xl md:text-4xl font-bold text-cyan-400 mb-4">Website Sedang Dalam Pemeliharaan</h2>
     <p class="text-gray-400 text-lg max-w-xl mb-8">
       Kami sedang melakukan perawatan sistem untuk meningkatkan kualitas layanan. Harap kembali beberapa saat lagi. Terima kasih atas kesabaran Anda.
     </p>
