@@ -1,10 +1,14 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NEWGROHO24.id</title>
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase CDN -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
 </head>
 <body class="bg-gray-950 text-white min-h-screen flex flex-col font-sans">
 
@@ -31,9 +35,20 @@
   <main class="flex-grow p-8 flex flex-col items-center justify-center text-center">
     <img src="https://cdn-icons-png.flaticon.com/512/5957/5957495.png" alt="Maintenance Icon" class="w-40 h-40 mb-6 opacity-80" />
     <h2 class="text-3xl md:text-4xl font-bold text-cyan-400 mb-4">Website Sedang Dalam Pemeliharaan</h2>
-    <p class="text-gray-400 text-lg max-w-xl">
+    <p class="text-gray-400 text-lg max-w-xl mb-8">
       Kami sedang melakukan perawatan sistem untuk meningkatkan kualitas layanan. Harap kembali beberapa saat lagi. Terima kasih atas kesabaran Anda.
     </p>
+
+    <!-- Chat Box -->
+    <div class="w-full max-w-md bg-gray-900 rounded-lg shadow-lg p-4">
+      <h3 class="text-xl font-semibold text-cyan-400 mb-3">💬 Live Chat</h3>
+      <div id="chat" class="h-60 overflow-y-scroll bg-gray-800 p-3 rounded mb-3 text-sm space-y-1"></div>
+      <input id="name" class="w-full mb-2 px-3 py-2 rounded bg-gray-700 text-white placeholder-gray-400" placeholder="Nama Anda" />
+      <div class="flex gap-2">
+        <input id="msg" class="flex-grow px-3 py-2 rounded bg-gray-700 text-white placeholder-gray-400" placeholder="Tulis pesan..." />
+        <button onclick="send()" class="bg-cyan-600 hover:bg-cyan-500 px-4 py-2 rounded text-white">Kirim</button>
+      </div>
+    </div>
   </main>
 
   <!-- Footer -->
@@ -58,5 +73,41 @@
     });
   </script>
 
+  <!-- Firebase Chat Script -->
+  <script>
+    // Konfigurasi Firebase kamu
+    const firebaseConfig = {
+      apiKey: "AIzaSyAa72M195nIsevvvwqDbuhSBODyGrInTqQ",
+      authDomain: "chatbox-feeb2.firebaseapp.com",
+      databaseURL: "https://chatbox-feeb2-default-rtdb.firebaseio.com",
+      projectId: "chatbox-feeb2",
+      storageBucket: "chatbox-feeb2.firebasestorage.app",
+      messagingSenderId: "434967499697",
+      appId: "1:434967499697:web:88f8282dcc97560e17a390"
+    };
+
+    // Inisialisasi Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Kirim pesan ke database
+    function send() {
+      const name = document.getElementById('name').value;
+      const msg = document.getElementById('msg').value;
+      if (!name || !msg) return;
+      db.ref("chat").push({ name, msg });
+      document.getElementById('msg').value = '';
+    }
+
+    // Tampilkan pesan dari database
+    db.ref("chat").on("child_added", (snapshot) => {
+      const data = snapshot.val();
+      const chatDiv = document.getElementById('chat');
+      const message = document.createElement('div');
+      message.innerHTML = `<span class="text-cyan-400 font-semibold">${data.name}:</span> ${data.msg}`;
+      chatDiv.appendChild(message);
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+    });
+  </script>
 </body>
 </html>
