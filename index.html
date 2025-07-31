@@ -3,30 +3,62 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Chat Realtime</title>
-  <style>
-    body { font-family: sans-serif; padding: 20px; background: #111; color: white; }
-    input, button { padding: 10px; margin: 5px; }
-    #chat { margin-top: 20px; }
-    .msg { margin-bottom: 10px; padding: 5px; background: #222; border-radius: 5px; }
-  </style>
+  <title>NEWGROHO24.id</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-950 text-white min-h-screen flex flex-col font-sans">
 
-  <h2>Chatbox Realtime</h2>
-  <input id="name" placeholder="Nama" />
-  <input id="message" placeholder="Pesan" />
-  <button onclick="sendMessage()">Kirim</button>
+  <!-- Header -->
+  <header class="flex justify-between items-center px-6 py-4 bg-gradient-to-r from-cyan-700 to-blue-800 shadow-md relative z-50">
+    <h1 class="text-2xl font-bold tracking-wide text-white">NEWGROHO24.id</h1>
+    
+    <div class="relative">
+      <button id="menuButton" class="md:hidden text-white bg-cyan-600 hover:bg-cyan-500 px-4 py-2 rounded font-medium transition">
+        MENU
+      </button>
+      
+      <div id="sidebar" class="absolute right-0 mt-3 w-48 bg-gray-900 rounded-md shadow-lg hidden z-50 md:flex md:static md:bg-transparent md:shadow-none md:rounded-none">
+        <nav class="flex flex-col divide-y divide-gray-700 md:flex-row md:items-center md:gap-8 md:divide-y-0">
+          <a href="#" class="block px-4 py-2 hover:text-cyan-400 transition">Beranda</a>
+          <a href="#" class="block px-4 py-2 hover:text-cyan-400 transition">Profil</a>
+          <a href="#" class="block px-4 py-2 hover:text-cyan-400 transition">Trading</a>
+        </nav>
+      </div>
+    </div>
+  </header>
 
-  <div id="chat"></div>
+  <!-- Konten Utama -->
+  <main class="flex-grow p-8 flex flex-col items-center justify-center text-center">
+    <img src="https://cdn-icons-png.flaticon.com/512/5957/5957495.png" alt="Maintenance Icon" class="w-40 h-40 mb-6 opacity-80" />
+    <h2 class="text-3xl md:text-4xl font-bold text-cyan-400 mb-4">Website Sedang Dalam Pemeliharaan</h2>
+    <p class="text-gray-400 text-lg max-w-xl">
+      Kami sedang melakukan perawatan sistem untuk meningkatkan kualitas layanan. Harap kembali beberapa saat lagi. Terima kasih atas kesabaran Anda.
+    </p>
+  </main>
 
-  <!-- Firebase Core -->
+  <!-- Chatbox -->
+  <section class="bg-gray-800 p-6 rounded-md mx-4 md:mx-auto mb-6 w-full max-w-xl">
+    <h3 class="text-xl font-semibold mb-4 text-cyan-400">Chatbox Realtime</h3>
+    <div class="flex flex-col md:flex-row gap-2 mb-4">
+      <input id="name" type="text" placeholder="Nama" class="flex-1 px-3 py-2 bg-gray-700 text-white rounded">
+      <input id="message" type="text" placeholder="Pesan" class="flex-1 px-3 py-2 bg-gray-700 text-white rounded">
+      <button onclick="sendMessage()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded">Kirim</button>
+    </div>
+    <div id="chat" class="space-y-2 max-h-64 overflow-y-auto bg-gray-900 p-3 rounded"></div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-400 text-center py-5 text-sm">
+    <p>© 2025 NEWGROHO24.id | Situs sedang dalam pemeliharaan.</p>
+  </footer>
+
+  <!-- Firebase JS -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
+  <!-- Firebase Config & Chat Logic -->
   <script>
-    // Konfigurasi Firebase
-    var firebaseConfig = {
+    const firebaseConfig = {
       apiKey: "AIzaSyAa72M195nIsevvvwqDbuhSBODyGrInTqQ",
       authDomain: "chatbox-feeb2.firebaseapp.com",
       projectId: "chatbox-feeb2",
@@ -35,6 +67,45 @@
       appId: "1:434967499697:web:88f8282dcc97560e17a390",
       databaseURL: "https://chatbox-feeb2-default-rtdb.asia-southeast1.firebasedatabase.app"
     };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function sendMessage() {
+      const name = document.getElementById("name").value;
+      const message = document.getElementById("message").value;
+      if (name && message) {
+        db.ref("chat").push({ name, message });
+        document.getElementById("message").value = "";
+      }
+    }
+
+    db.ref("chat").on("child_added", (snapshot) => {
+      const data = snapshot.val();
+      const chat = document.getElementById("chat");
+      const div = document.createElement("div");
+      div.textContent = `${data.name}: ${data.message}`;
+      div.className = "bg-gray-700 text-white px-3 py-2 rounded";
+      chat.appendChild(div);
+    });
+  </script>
+
+  <!-- Menu Script -->
+  <script>
+    const menuButton = document.getElementById('menuButton');
+    const sidebar = document.getElementById('sidebar');
+    menuButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('hidden');
+    });
+    window.addEventListener('click', (e) => {
+      if (!menuButton.contains(e.target) && !sidebar.contains(e.target)) {
+        sidebar.classList.add('hidden');
+      }
+    });
+  </script>
+
+</body>
+</html>    };
 
     // Inisialisasi Firebase
     firebase.initializeApp(firebaseConfig);
