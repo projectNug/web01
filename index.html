@@ -4,21 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Chat Realtime</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #111; color: white; }
+    input, button { padding: 10px; margin: 5px; }
+    #chat { margin-top: 20px; }
+    .msg { margin-bottom: 10px; padding: 5px; background: #222; border-radius: 5px; }
+  </style>
 </head>
 <body>
-  <h2>Chatbox</h2>
+
+  <h2>Chatbox Realtime</h2>
   <input id="name" placeholder="Nama" />
   <input id="message" placeholder="Pesan" />
   <button onclick="sendMessage()">Kirim</button>
+
   <div id="chat"></div>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+  <!-- Firebase Core -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <script>
-    // Konfigurasi Firebase kamu
-    const firebaseConfig = {
+    // Konfigurasi Firebase
+    var firebaseConfig = {
       apiKey: "AIzaSyAa72M195nIsevvvwqDbuhSBODyGrInTqQ",
       authDomain: "chatbox-feeb2.firebaseapp.com",
       projectId: "chatbox-feeb2",
@@ -28,13 +36,37 @@
       databaseURL: "https://chatbox-feeb2-default-rtdb.asia-southeast1.firebasedatabase.app"
     };
 
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    // Inisialisasi Firebase
+    firebase.initializeApp(firebaseConfig);
+    var db = firebase.database();
 
+    // Kirim pesan
     function sendMessage() {
-      const name = document.getElementById("name").value;
-      const message = document.getElementById("message").value;
+      var name = document.getElementById("name").value;
+      var message = document.getElementById("message").value;
 
+      if (name && message) {
+        db.ref("chat").push({
+          name: name,
+          message: message
+        });
+        document.getElementById("message").value = "";
+      }
+    }
+
+    // Tampilkan pesan realtime
+    db.ref("chat").on("child_added", function(snapshot) {
+      var data = snapshot.val();
+      var chat = document.getElementById("chat");
+      var div = document.createElement("div");
+      div.className = "msg";
+      div.textContent = data.name + ": " + data.message;
+      chat.appendChild(div);
+    });
+  </script>
+
+</body>
+</html>
       db.ref("chat").push({
         name: name,
         message: message
